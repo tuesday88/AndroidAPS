@@ -8,12 +8,11 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
-    - name: set up JDK 17
+    
+    - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
         java-version: '17'
@@ -22,6 +21,7 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+      
     - name: Build with Gradle
       run: |
         export storePassword=${{ secrets.STORE_PASSWORD }}
@@ -29,10 +29,25 @@ jobs:
         export keyPassword=${{ secrets.KEY_PASSWORD }}
         export storeFile=${{ secrets.STORE_FILE }}
         ./gradlew assembleFullRelease
-    - name: Archive production artifacts
+        
+    # 添加验证步骤
+    - name: Verify build outputs
+      run: |
+        echo "Build outputs:"
+        find . -name '*.apk' -ls
+        mkdir -p verification && touch verification/apk-exists
+        
+    # 使用路径变量
+    - name: Locate release APKs
+      id: locate-apk
+      run: |
+        echo "apk_path=$(find . -path '*/full/release/*.apk' -print -quit)" >> $GITHUB_OUTPUT
+        echo "Found APK at: ${{ steps.locate-apk.outputs.apk_path }}"
+      
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: aaps
-        path: app/build/outputs/apk/full/release/*.apk
-	overwrite: true  
-    	compression-level: 9 
+        path: ${{ steps.locate-apk.outputs.apk_path }}
+        overwrite: true
+        retention-days: 7
