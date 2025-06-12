@@ -33,6 +33,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: aaps
-        path: app/build/outputs/apk/full/release
+        path: app/build/outputs/apk/full/release/*.apk
 	overwrite: true  
     	compression-level: 9 
