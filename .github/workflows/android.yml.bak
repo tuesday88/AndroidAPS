@@ -34,5 +34,3 @@ jobs:
       with:
         name: aaps
         path: app/build/outputs/apk/full/release
-				overwrite: true  
-    		compression-level: 9 
